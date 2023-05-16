@@ -1,14 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import './options.css'
-
-const App: React.FC<{}> = () => {
-  return (
-    <div>
-      <img src="icon.png" />
-    </div>
-  )
-}
+import App from './App'
 
 const container = document.createElement('div')
 document.body.appendChild(container)
