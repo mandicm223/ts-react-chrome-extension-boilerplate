@@ -1,24 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react'
 
-const addData = (d) => {
-  chrome.storage.local.get(['data'], function (result) {
-    d = result.data || []
-    console.log(d)
-    return d
-  })
-}
-var data = addData(data)
+import { getData } from '../../utils/api'
 
-console.log(data + 'OVOOOO JE DATAAA')
-
-// const addData2 = () => {
-//   for (let i = 0; i < data.length; i++) {
-// const { domainName, favicon, timestamp, url, testingText } = data[i]
-//   }
-// }
-
-const Dashboard = () => {
-  return <>{}</>
+var data = []
+const Dashboard: React.FC<{}> = () => {
+  console.log()
+  useEffect(() => {
+    getData(data)
+      .then((data) => console.log(data))
+      .catch((err) => console.log(err))
+  }, [])
+  return (
+    <div>
+      <img src="icon.png" />
+    </div>
+  )
 }
 
 export default Dashboard
