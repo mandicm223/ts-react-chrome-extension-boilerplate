@@ -19,39 +19,47 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebase = initializeApp(firebaseConfig)
 
-export async function postData(
-  enc_domain,
-  domain,
-  url,
-  timestamp,
-  favicon
-): Promise<any> {
-  try {
-    const db = getDatabase(firebase)
-    const postId = push(child(ref(db), '/domain/' + enc_domain)).key
-    update(ref(db, '/domain/' + enc_domain + '/' + postId), {
-      timestamp,
-      domain,
-      url,
-      favicon,
-    })
-      .then(() => {
-        //return response
-        return console.log('success')
+chrome.runtime.onMessage.addListener((msg, sender, response) => {
+  if (msg.command == 'options') {
+    const dbRef = ref(getDatabase(firebase))
+    const enc_domain = 'd3d3Lmdvb2dsZS5jb20='
+
+    get(child(dbRef, '/domain/'))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          response({
+            type: 'result',
+            status: 'success',
+            data: snapshot.val(),
+            request: msg,
+          })
+        } else {
+          response({
+            type: 'result',
+            status: 'success',
+            data: [],
+            request: msg,
+          })
+          console.log('No data available')
+        }
       })
       .catch((error) => {
-        // The write failed...
-        return console.log('error:', error)
+        console.error(error)
+        response({
+          type: 'result',
+          status: 'error',
+          error: error,
+          data: [],
+          request: msg,
+        })
+        console.log('No data available')
       })
-  } catch (e) {
-    return console.log('error:', e)
   }
-}
-
-chrome.runtime.onMessage.addListener((msg, sender, response) => {
   if (msg.command == 'post') {
     var domain = msg.domain
     var enc_domain = btoa(domain)
+    var url = msg.url
+    var favicon = msg.favicon
     var currentdate = new Date()
     var datetime =
       'Date: ' +
@@ -67,15 +75,39 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
       ':' +
       currentdate.getSeconds()
 
-    const data = postData(
-      enc_domain,
-      msg.domain,
-      msg.url,
-      datetime,
-      msg.favicon
-    )
-    response({
-      data: data,
-    })
+    try {
+      const db = getDatabase(firebase)
+      const postId = push(child(ref(db), '/domain/' + enc_domain)).key
+      update(ref(db, '/domain/' + enc_domain + '/' + postId), {
+        enc_domain,
+        domain,
+        datetime,
+        url,
+        favicon,
+      })
+        .then(() => {
+          //return response
+          response({
+            type: 'result',
+            status: 'success',
+            data: postId,
+            request: msg,
+          })
+        })
+        .catch((error) => {
+          // The write failed...
+          console.log('error:', error)
+          response({
+            type: 'result',
+            status: 'error',
+            data: error,
+            request: msg,
+          })
+        })
+    } catch (e) {
+      console.log('error:', e)
+      response({ type: 'result', status: 'error', data: e, request: msg })
+    }
   }
+  return true
 })

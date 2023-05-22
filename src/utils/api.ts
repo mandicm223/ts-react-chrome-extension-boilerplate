@@ -1,1 +1,1 @@
-export async function getData(data): Promise<any> {}
+// export async function getData(data): Promise<any> {}

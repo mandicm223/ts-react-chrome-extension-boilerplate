@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react'
 
-import { getData } from '../../utils/api'
+// import { getData } from '../../background/background'
 
-var data = []
 const Dashboard: React.FC<{}> = () => {
-  console.log()
   useEffect(() => {
-    getData(data)
-      .then((data) => console.log(data))
-      .catch((err) => console.log(err))
+    chrome.runtime.sendMessage(
+      {
+        command: 'options',
+      },
+      (response) => {
+        console.log(response)
+      }
+    )
   }, [])
   return (
     <div>
